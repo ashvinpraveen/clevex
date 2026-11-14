@@ -80,3 +80,16 @@ References:
 - https://developers.openai.com/siwc/token-sharing-open-source/profiles-and-sessions
 - https://developers.openai.com/siwc/token-sharing-open-source/models-and-inference
 - https://developers.openai.com/siwc/token-sharing-open-source/preview-limitations
+
+## Verified on 15 November 2026
+
+- Live OpenAI authorization completed with Clevex's own dynamic registration.
+- The local panel displayed the connected account and its discovered models.
+- The live smoke test completed one request with `gpt-6.1-sol`; Clevex's parser
+  recognized the returned LaTeX edit and its applicator fixed the synthetic typo.
+- All 16 automated checks passed; ESLint and TypeScript passed.
+- The webpack build compiled and passed TypeScript, then stopped during page-data
+  collection because the fresh clone has no Convex site URL. The default
+  Turbopack build also encountered an environment worker-port error.
+- The authenticated editor, persisted project workflow and PDF compilation remain
+  unverified. No merge or deployment was performed.
