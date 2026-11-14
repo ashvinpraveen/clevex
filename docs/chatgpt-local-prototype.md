@@ -84,12 +84,18 @@ References:
 ## Verified on 15 November 2026
 
 - Live OpenAI authorization completed with Clevex's own dynamic registration.
-- The local panel displayed the connected account and its discovered models.
-- The live smoke test completed one request with `gpt-6.1-sol`; Clevex's parser
-  recognized the returned LaTeX edit and its applicator fixed the synthetic typo.
-- All 16 automated checks passed; ESLint and TypeScript passed.
-- The webpack build compiled and passed TypeScript, then stopped during page-data
-  collection because the fresh clone has no Convex site URL. The default
-  Turbopack build also encountered an environment worker-port error.
-- The authenticated editor, persisted project workflow and PDF compilation remain
-  unverified. No merge or deployment was performed.
+- Account-specific model discovery and a live `gpt-6.1-sol` smoke test passed.
+- A dedicated Convex development project was configured, and the user completed
+  Clevex signup. The authenticated dashboard created a blank LaTeX project.
+- In the actual editor, GPT-6.1 Sol proposed a reviewable diff updating the title
+  and introduction. Applying it changed `main.tex` and saved it to Convex.
+- Compilation through the configured cloud `pdflatex` service succeeded. The PDF
+  preview displayed both edits. Download produced a valid one-page PDF, whose
+  text and independently rendered page were checked.
+- A full browser reload retained the project name, edited LaTeX, chat history,
+  and applied-diff status. The PDF preview remained available.
+- All 16 automated checks, ESLint and TypeScript passed. The production build
+  completed successfully with `next build --webpack` after Convex configuration.
+  The environment's default Turbopack worker previously failed to bind a port.
+- This verifies the local app and its development backend. No production rollout
+  or merge was performed.
