@@ -16,7 +16,7 @@ export type WireRequest = {
   effort?: Effort;
   /** Browser-held credential; absent when the server has its own. */
   auth?:
-    | { kind: "chatgpt-oauth"; accessToken: string; accountId?: string }
+    | { kind: "chatgpt-local" }
     | { kind: "claude-oauth"; accessToken: string }
     | { kind: "anthropic-key"; apiKey: string };
   sessionId?: string;

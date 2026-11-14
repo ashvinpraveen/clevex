@@ -42,3 +42,6 @@ next-env.d.ts
 /public/pdf.worker.min.mjs
 
 !.env.example
+
+# Protected local ChatGPT runtime
+/.clevex/
