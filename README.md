@@ -33,6 +33,14 @@ sees the whole project and proposes changes as diffs you can apply or undo.
 It started as a side project at [Cleve](https://www.cleve.ai) and uses the Cleve
 design system.
 
+## Local ChatGPT integration prototype
+
+This fork includes an official Sign in with ChatGPT prototype for local use.
+ChatGPT tokens stay in protected local runtime storage, and inference uses the
+public Responses API. The remaining upstream documentation below describes the
+original integration; follow [the prototype guide](docs/chatgpt-local-prototype.md)
+for this branch's ChatGPT setup and limitations. Claude integration is unchanged.
+
 ## Features
 
 | | |

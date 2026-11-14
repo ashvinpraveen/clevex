@@ -1,22 +1,11 @@
-/**
- * OAuth parameters for "Sign in with ChatGPT" (the public Codex CLI client)
- * and "Sign in with Claude" (the public Claude Code client).
- *
- * ChatGPT: https://github.com/openai/codex — codex-rs/login (issuer, client id,
- *   PKCE S256, fixed redirect to localhost:1455, extra authorize params).
- * Claude:  Claude Code CLI OAuth config (authorize/token endpoints, manual
- *   redirect that shows a code to paste back).
- */
-
+/** Official ChatGPT plan usage endpoints; Claude configuration is unchanged. */
 export const CHATGPT = {
   issuer: "https://auth.openai.com",
-  authorizeUrl: "https://auth.openai.com/oauth/authorize",
-  tokenUrl: "https://auth.openai.com/oauth/token",
-  clientId: "app_EMoamEEZ73f0CkXaXp7hrann",
-  redirectUri: "http://localhost:1455/auth/callback",
-  scope: "openid profile email offline_access",
-  apiBase: "https://chatgpt.com/backend-api/codex",
-  originator: "codex_cli_rs",
+  authorizeUrl: "https://auth.openai.com/api/accounts/authorize",
+  tokenUrl: "https://auth.openai.com/api/accounts/oauth/token",
+  scope:
+    "openid profile email offline_access resource.invoke chatgpt.tokens.use.direct",
+  apiBase: "https://api.openai.com/v1",
 } as const;
 
 export const CLAUDE = {

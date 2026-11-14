@@ -21,7 +21,12 @@ export type StreamOptions = {
   onStatus?: (text: string) => void;
 };
 
-export type StreamResult = { text: string; thinking: string; error?: string; model: string };
+export type StreamResult = {
+  text: string;
+  thinking: string;
+  error?: string;
+  model: string;
+};
 
 async function authFor(model: string): Promise<WireRequest["auth"]> {
   const provider = providerOf(model);
@@ -32,8 +37,8 @@ async function authFor(model: string): Promise<WireRequest["auth"]> {
       if (server.serverChatGPT) return undefined;
       throw new Error("Connect your ChatGPT account to use GPT models.");
     }
-    const c = await ensureChatGPT();
-    return { kind: "chatgpt-oauth", accessToken: c.accessToken, accountId: c.accountId };
+    await ensureChatGPT();
+    return { kind: "chatgpt-local" };
   }
   if (!creds.claude) {
     if (server.serverClaude) return undefined;
@@ -45,12 +50,19 @@ async function authFor(model: string): Promise<WireRequest["auth"]> {
     : { kind: "claude-oauth", accessToken: c.accessToken };
 }
 
-export function isProviderReady(model: string, server: { serverClaude: boolean; serverChatGPT: boolean }) {
+export function isProviderReady(
+  model: string,
+  server: { serverClaude: boolean; serverChatGPT: boolean },
+) {
   const creds = getCredentials();
-  return providerOf(model) === "chatgpt" ? !!creds.chatgpt || server.serverChatGPT : !!creds.claude || server.serverClaude;
+  return providerOf(model) === "chatgpt"
+    ? !!creds.chatgpt?.sharing || server.serverChatGPT
+    : !!creds.claude || server.serverClaude;
 }
 
-export async function streamCompletion(opts: StreamOptions): Promise<StreamResult> {
+export async function streamCompletion(
+  opts: StreamOptions,
+): Promise<StreamResult> {
   let text = "";
   let thinking = "";
   let error: string | undefined;
@@ -68,7 +80,7 @@ export async function streamCompletion(opts: StreamOptions): Promise<StreamResul
     };
     const res = await fetch(`/api/ai/${providerOf(opts.model)}`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", "x-clevex": "1" },
       body: JSON.stringify(body),
       signal: opts.signal,
     });

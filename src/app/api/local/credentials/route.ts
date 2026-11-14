@@ -14,33 +14,41 @@ export const runtime = "nodejs";
  */
 export async function GET(req: Request) {
   if (!isLocalRequest(req) || req.headers.get("x-clevex") !== "1") {
-    return Response.json({ error: "Only available when clevex runs on your own machine." }, { status: 403 });
+    return Response.json(
+      { error: "Only available when clevex runs on your own machine." },
+      { status: 403 },
+    );
   }
   const provider = new URL(req.url).searchParams.get("provider");
 
   if (provider === "chatgpt") {
-    const home = process.env.CODEX_HOME || path.join(homedir(), ".codex");
-    try {
-      const raw = await readFile(path.join(home, "auth.json"), "utf8");
-      return Response.json({ raw });
-    } catch {
-      return Response.json(
-        { error: "No Codex login found (~/.codex/auth.json). Run `codex login` first, or use Sign in with ChatGPT." },
-        { status: 404 },
-      );
-    }
+    return Response.json(
+      {
+        error:
+          "Use Continue with ChatGPT. Codex credential import is no longer supported.",
+      },
+      { status: 410 },
+    );
   }
 
   if (provider === "claude") {
     const fromKeychain = await new Promise<string | null>((resolve) => {
       if (process.platform !== "darwin") return resolve(null);
-      execFile("security", ["find-generic-password", "-s", "Claude Code-credentials", "-w"], { timeout: 5000 }, (err, out) =>
-        resolve(err ? null : String(out).trim()),
+      execFile(
+        "security",
+        ["find-generic-password", "-s", "Claude Code-credentials", "-w"],
+        { timeout: 5000 },
+        (err, out) => resolve(err ? null : String(out).trim()),
       );
     });
     const candidates = [fromKeychain];
     try {
-      candidates.push(await readFile(path.join(homedir(), ".claude", ".credentials.json"), "utf8"));
+      candidates.push(
+        await readFile(
+          path.join(homedir(), ".claude", ".credentials.json"),
+          "utf8",
+        ),
+      );
     } catch {
       /* none */
     }
@@ -48,7 +56,10 @@ export async function GET(req: Request) {
       if (!raw) continue;
       try {
         const j = JSON.parse(raw);
-        if (j?.claudeAiOauth?.accessToken) return Response.json({ raw: JSON.stringify({ claudeAiOauth: j.claudeAiOauth }) });
+        if (j?.claudeAiOauth?.accessToken)
+          return Response.json({
+            raw: JSON.stringify({ claudeAiOauth: j.claudeAiOauth }),
+          });
       } catch {
         /* skip */
       }

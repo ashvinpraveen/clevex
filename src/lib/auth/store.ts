@@ -1,24 +1,12 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-
-/**
- * Credentials live in this browser only (localStorage). The server routes are
- * stateless proxies: every request carries the caller's own token, so a
- * deployed clevex never holds anyone's subscription.
- */
+import { useEffect, useSyncExternalStore } from "react";
 
 export type ChatGPTCredential = {
-  kind: "chatgpt-oauth";
-  accessToken: string;
-  refreshToken?: string;
-  idToken?: string;
-  accountId?: string;
+  kind: "chatgpt-local";
   email?: string;
-  plan?: string;
-  expiresAt?: number; // ms epoch
-  /** "oauth" = our own login (safe to refresh); "import" = borrowed from Codex CLI. */
-  source: "oauth" | "import";
+  sharing: boolean;
+  models: import("../ai/models").ModelOption[];
 };
 
 export type ClaudeCredential =
@@ -48,6 +36,11 @@ function read(): Credentials {
   if (cache) return cache;
   try {
     cache = JSON.parse(localStorage.getItem(KEY) || "{}") as Credentials;
+    // Drop legacy ChatGPT tokens. Only the local runtime can restore a connection.
+    if (cache.chatgpt) {
+      delete cache.chatgpt;
+      localStorage.setItem(KEY, JSON.stringify(cache));
+    }
   } catch {
     cache = {};
   }
@@ -62,14 +55,20 @@ export function setCredentials(update: (c: Credentials) => Credentials) {
   const next = update({ ...read() });
   cache = next;
   try {
-    localStorage.setItem(KEY, JSON.stringify(next));
+    localStorage.setItem(KEY, JSON.stringify({ ...next, chatgpt: undefined }));
   } catch {
     /* storage may be unavailable; keep in memory */
   }
   listeners.forEach((l) => l());
 }
 
+let restoring: Promise<unknown> | undefined;
 export function useCredentials(): Credentials {
+  useEffect(() => {
+    restoring ??= import("./chatgpt")
+      .then((m) => m.refreshChatGPTSession())
+      .catch(() => {});
+  }, []);
   return useSyncExternalStore(
     (cb) => {
       listeners.add(cb);

@@ -1,3 +1,5 @@
+> **This branch:** ChatGPT now uses the official local Sign in with ChatGPT flow. Follow [the prototype guide](chatgpt-local-prototype.md). The ChatGPT instructions below describe the original upstream integration.
+
 # Connecting ChatGPT & Claude
 
 Open **Connect** from the top bar, or click the ChatGPT or Claude pill. A green

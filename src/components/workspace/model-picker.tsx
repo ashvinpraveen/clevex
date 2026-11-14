@@ -21,17 +21,22 @@ import { updateSettings, useSettings } from "@/lib/settings";
 import type { ProviderId } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export function ModelPicker({ onConnect }: { onConnect: (p: ProviderId) => void }) {
+export function ModelPicker({
+  onConnect,
+}: {
+  onConnect: (p: ProviderId) => void;
+}) {
   const { model, effort } = useSettings();
   const creds = useCredentials();
   const server = useServerConfig();
-  const ready = (p: ProviderId) => (p === "chatgpt" ? !!creds.chatgpt || !!server?.serverChatGPT : !!creds.claude || !!server?.serverClaude);
+  const ready = (p: ProviderId) =>
+    p === "chatgpt"
+      ? !!creds.chatgpt?.sharing || !!server?.serverChatGPT
+      : !!creds.claude || !!server?.serverClaude;
 
   return (
     <Menu>
-      <MenuTrigger
-        className="inline-flex h-7 max-w-[13rem] items-center gap-1.5 rounded-lg px-2 font-medium text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-foreground data-popup-open:bg-accent"
-      >
+      <MenuTrigger className="inline-flex h-7 max-w-[13rem] items-center gap-1.5 rounded-lg px-2 font-medium text-muted-foreground text-xs transition-colors hover:bg-accent hover:text-foreground data-popup-open:bg-accent">
         <ProviderGlyph provider={providerOf(model)} className="size-3.5" />
         <span className="truncate">{modelLabel(model)}</span>
         <ChevronDown className="size-3 opacity-60" />
@@ -40,21 +45,58 @@ export function ModelPicker({ onConnect }: { onConnect: (p: ProviderId) => void 
         {(["claude", "chatgpt"] as const).map((p) => (
           <MenuGroup key={p}>
             <MenuGroupLabel className="flex items-center gap-1.5">
-              <ProviderGlyph provider={p} className="size-3" /> {p === "chatgpt" ? "ChatGPT subscription" : "Claude subscription"}
+              <ProviderGlyph provider={p} className="size-3" />{" "}
+              {p === "chatgpt"
+                ? creds.chatgpt?.sharing
+                  ? "Using ChatGPT plan"
+                  : "ChatGPT"
+                : "Claude subscription"}
             </MenuGroupLabel>
             {ready(p) ? (
-              MODELS.filter((m) => m.provider === p).map((m) => (
-                <MenuItem key={m.id} onClick={() => updateSettings({ model: m.id })} className="justify-between">
+              (p === "chatgpt" && creds.chatgpt
+                ? creds.chatgpt.models
+                : MODELS.filter((m) => m.provider === p)
+              ).map((m) => (
+                <MenuItem
+                  key={m.id}
+                  onClick={() => updateSettings({ model: m.id })}
+                  className="justify-between"
+                >
                   <span className="flex items-center gap-2">
-                    <Check className={cn("size-3.5", m.id === model ? "opacity-100" : "opacity-0")} />
+                    <Check
+                      className={cn(
+                        "size-3.5",
+                        m.id === model ? "opacity-100" : "opacity-0",
+                      )}
+                    />
                     {m.label}
                   </span>
-                  {m.hint && <span className="text-muted-foreground text-xs">{m.hint}</span>}
+                  {m.hint && (
+                    <span className="text-muted-foreground text-xs">
+                      {m.hint}
+                    </span>
+                  )}
                 </MenuItem>
               ))
             ) : (
-              <MenuItem onClick={() => onConnect(p)} className="text-brand-strong">
+              <MenuItem
+                onClick={() => onConnect(p)}
+                className="text-brand-strong"
+              >
                 Connect {p === "chatgpt" ? "ChatGPT" : "Claude"}…
+              </MenuItem>
+            )}
+            {p === "chatgpt" && creds.chatgpt?.sharing && (
+              <MenuItem
+                onClick={() =>
+                  window.open(
+                    "https://chatgpt.com/#settings/Usage",
+                    "_blank",
+                    "noopener,noreferrer",
+                  )
+                }
+              >
+                Manage ChatGPT usage
               </MenuItem>
             )}
             <MenuSeparator />
@@ -64,7 +106,10 @@ export function ModelPicker({ onConnect }: { onConnect: (p: ProviderId) => void 
           <MenuGroupLabel className="flex items-center gap-1.5">
             <Gauge className="size-3" /> Reasoning effort
           </MenuGroupLabel>
-          <MenuRadioGroup value={effort} onValueChange={(v) => updateSettings({ effort: v as Effort })}>
+          <MenuRadioGroup
+            value={effort}
+            onValueChange={(v) => updateSettings({ effort: v as Effort })}
+          >
             <MenuRadioItem value="low">Low · fastest</MenuRadioItem>
             <MenuRadioItem value="medium">Medium</MenuRadioItem>
             <MenuRadioItem value="high">High · most thorough</MenuRadioItem>
